@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RICHFLIX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
+body { background:#141414; color:white; overflow-x:hidden; }
+
+/* ================= PROFILE SCREEN ================= */
+
+#profileScreen {
+  position:fixed;
+  inset:0;
+  background:black;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:10000;
+}
+
+.profile-title {
+  font-size:28px;
+  margin-bottom:40px;
+}
+
+.profile-box {
+  width:150px;
+  height:150px;
+  background:#e50914;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:60px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:transform 0.3s ease;
+}
+
+.profile-box:hover {
+  transform:scale(1.1);
+}
+
+/* ================= RICHFLIX LIGHT INTRO ================= */
+
+#introScreen {
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  overflow:hidden;
+}
+
+.beam {
+  position:absolute;
+  width:4px;
+  height:200%;
+  background:linear-gradient(to bottom, #e50914, #ff3b3b, #e50914);
+  animation:beamMove 2.5s forwards;
+}
+
+@keyframes beamMove {
+  0% { transform:translateX(-100vw); opacity:0; }
+  50% { opacity:1; }
+  100% { transform:translateX(100vw); opacity:0; }
+}
+
+.richflix-text {
+  font-size:60px;
+  font-weight:bold;
+  letter-spacing:6px;
+  color:white;
+  opacity:0;
+  animation:fadeIn 1s ease 2s forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity:1; }
+}
+
+/* ================= NAVBAR ================= */
+
+.navbar {
+  position:fixed;
+  width:100%;
+  padding:20px 50px;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+  z-index:10;
+}
+
+.logo {
+  color:#e50914;
+  font-size:28px;
+  font-weight:bold;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+  min-height:100vh;
+  background:url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  display:flex;
+  align-items:center;
+  padding:120px 60px;
+  position:relative;
+}
+
+.overlay {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.6);
+}
+
+.hero-content {
+  position:relative;
+  z-index:2;
+  max-width:600px;
+}
+
+.hero h1 {
+  font-size:52px;
+  border-right:3px solid white;
+  white-space:nowrap;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+
+.btn {
+  padding:12px 25px;
+  border:none;
+  cursor:pointer;
+  border-radius:4px;
+  margin-right:10px;
+}
+
+.play { background:white; color:black; }
+.info { background:rgba(109,109,110,0.7); color:white; }
+
+/* ================= MODAL ================= */
+
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.95);
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  z-index:100;
+}
+
+.modal-content {
+  background:#181818;
+  padding:40px;
+  border-radius:10px;
+  max-width:500px;
+}
+
+.yes { background:#e50914; color:white; }
+.no { background:grey; color:white; }
+
+.hidden { display:none; }
+
+/* ================= VIDEO PLAYER ================= */
+
+#videoScreen {
+  position:fixed;
+  inset:0;
+  background:black;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:20000;
+}
+
+#videoScreen video {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+</style>
+</head>
+<body>
+
+<!-- PROFILE SCREEN -->
+<div id="profileScreen">
+  <div class="profile-title">Who's watching?</div>
+  <div class="profile-box" onclick="startIntro()">O</div>
+  <div style="margin-top:15px;">Oluwatoyin</div>
+</div>
+
+<!-- LIGHT INTRO -->
+<div id="introScreen">
+  <div class="beam"></div>
+  <div class="richflix-text">RICHFLIX</div>
+</div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">RICHFLIX</div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="overlay"></div>
+  <div class="hero-content">
+    <h1 id="typewriter"></h1>
+    <p>Starring: You & Me ❤️</p>
+    <button class="btn play" onclick="openModal()">▶ Play</button>
+    <button class="btn info">More Info</button>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal" id="proposalModal">
+  <div class="modal-content">
+    <h2>Will You Be My Valentine? ❤️</h2>
+    <div style="margin-top:20px;">
+      <button class="btn yes" onclick="sayYes()">Yes ❤️</button>
+      <button class="btn no" id="noBtn" onmouseover="moveButton()">No 😢</button>
+    </div>
+
+    <div id="afterYes" class="hidden" style="margin-top:25px;">
+      <p style="color:#e50914;">You for no say yes nau 🎉</p>
+      <button class="btn yes" onclick="playVideo()">Continue Watching ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO SCREEN -->
+<div id="videoScreen">
+  <video id="finalVideo" controls>
+    <source src="ourvideo.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgMusic">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="tudumSound">
+  <source src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+/* PROFILE -> INTRO */
+function startIntro(){
+  document.getElementById("profileScreen").style.display="none";
+  document.getElementById("introScreen").style.display="flex";
+
+  setTimeout(()=>{
+    document.getElementById("introScreen").style.display="none";
+    startTypewriter();
+  },3000);
+}
+
+/* TYPEWRITER */
+function startTypewriter(){
+  const text="Dear Oluwatoyin";
+  let i=0;
+  function typing(){
+    if(i<text.length){
+      document.getElementById("typewriter").innerHTML+=text.charAt(i);
+      i++;
+      setTimeout(typing,100);
+    }
+  }
+  typing();
+}
+
+/* OPEN MODAL */
+function openModal(){
+  document.getElementById("proposalModal").style.display="flex";
+  document.getElementById("tudumSound").play();
+  document.getElementById("bgMusic").play();
+}
+
+/* YES */
+function sayYes(){
+  document.getElementById("afterYes").classList.remove("hidden");
+  confetti({particleCount:200,spread:120,origin:{y:0.6}});
+}
+
+/* RUNNING NO */
+function moveButton(){
+  const btn=document.getElementById("noBtn");
+  btn.style.transform=`translate(${Math.random()*300-150}px,${Math.random()*300-150}px)`;
+}
+
+/* PLAY VIDEO */
+function playVideo(){
+  document.getElementById("bgMusic").pause();
+  document.getElementById("proposalModal").style.display="none";
+  document.getElementById("videoScreen").style.display="flex";
+  document.getElementById("finalVideo").play();
+}
+
+</script>
+
+</body>
+</html>
